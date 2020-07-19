@@ -1,9 +1,23 @@
-#include "lattice.h"
-
-Lattice::Lattice(int dim, std::vector<std::vector<double>> &payoff) 
+#include "latticeqobject.h"
+#include "LatticeThread.h"
+#include <QDir>
+#include <chrono>
+#include <ctime>
+LatticeQObject::LatticeQObject(QObject *parent) : QObject(parent)
 {
-    dimension = dim;
-    payoff_matrix = payoff;
+
+}
+void LatticeQObject::initialise(int dimension, double b, double e, int t)
+{
+    this->dimension = dimension;
+    this->e = e;
+    this->b = b;
+    this->t = t;
+    std::vector<double> payoff_row1{1., 0.};
+    std::vector<double> payoff_row2{b, e};
+
+    payoff_matrix.push_back(payoff_row1);
+    payoff_matrix.push_back(payoff_row2);
 
     for (int i = 0; i < dimension; ++i)
     {
@@ -17,18 +31,70 @@ Lattice::Lattice(int dim, std::vector<std::vector<double>> &payoff)
     }
 
     lattice[(int)((dimension-1)/2)][(int)((dimension-1)/2)] = 'd';
+    //path = QDir::current().absolutePath() + "/picture.ppm";
+    //path = QDir("./picture.ppm");
 
+    set_status(QString("Press \"Simulate\" to begin...."));
 }
 
-Lattice::~Lattice()
+void LatticeQObject::set_t(QString t)
 {
+   this->t = t.toInt();
 }
+
+void LatticeQObject::set_e(QString e)
+{
+    this->e = e.toDouble();
+}
+
+void LatticeQObject::set_b(QString b)
+{
+    this->b = b.toDouble();
+}
+
+void LatticeQObject::set_dimension(QString dimension)
+{
+    this->dimension = dimension.toInt();
+
+}
+
+QString LatticeQObject::get_t()
+{
+    return QString::number(t);
+}
+
+QString LatticeQObject::get_e()
+{
+    return QString::number(e);
+}
+
+QString LatticeQObject::get_b()
+{
+    return QString::number(b);
+}
+
+QString LatticeQObject::get_dimension()
+{
+    return QString::number(dimension);
+}
+
+QString LatticeQObject::get_path()
+{
+    return path;
+}
+
+void LatticeQObject::set_path(QString path)
+{
+    this->path = path;
+    emit path_changed();
+}
+
 
 /**
 ** Takes in a board of any square dimension, and gets all the neighbours of a cell.
 ** Cells around the edge are wrapped around to create a toroid like shape.
 **/
-std::vector<std::vector<int>> Lattice::get_neighbours(std::vector<int> index)
+std::vector<std::vector<int>> LatticeQObject::get_neighbours(std::vector<int> index)
 {
         std::vector<std::vector<int>> neighbours;
 
@@ -73,9 +139,9 @@ std::vector<std::vector<int>> Lattice::get_neighbours(std::vector<int> index)
 /**
 ** Play the spatial game with the cell's neighbours. Currently, only cooperator/defector strategy is used.
 **/
-double Lattice::play_with_neighbours(char player, std::vector<char> neighbours)
+double LatticeQObject::play_with_neighbours(char player, std::vector<char> neighbours)
 {
-        int player_strat = player == 'c' ? 0 : 1;
+    int player_strat = player == 'c' ? 0 : 1;
     double result = 0;
     for (auto &neighbour : neighbours)
     {
@@ -89,9 +155,9 @@ double Lattice::play_with_neighbours(char player, std::vector<char> neighbours)
 /**
 ** Create a new board, but along with the cell's strategy, it's payoff value is also recorded.
 **/
-std::vector<std::vector<std::tuple<char, double>>> Lattice::get_payoff_values()
+std::vector<std::vector<std::tuple<char, double>>> LatticeQObject::get_payoff_values()
 {
-        // Preload an array with tuples representing the strategy and it's payoff. 
+        // Preload an array with tuples representing the strategy and it's payoff.
     std::vector<std::vector<std::tuple<char, double>>> payoff_board;
     for (int i = 0; i < dimension; ++i)
     {
@@ -108,18 +174,24 @@ std::vector<std::vector<std::tuple<char, double>>> Lattice::get_payoff_values()
         {
             // Get the player index and strategy
             std::vector<int> player_idx = {i ,j};
+
             char player = lattice[i][j];
             // Get all the neighbours indices
             std::vector<std::vector<int>> neighbours = get_neighbours(player_idx);
+
             // Get all neighbour strategies
             std::vector<char> players;
             for (auto &idx : neighbours)
             {
+
+
                 players.push_back(lattice[idx[0]][idx[1]]);
-            } 
+            }
+
             // Get the payoff of the cell
             double cell_sum = play_with_neighbours(player, players);
             payoff_board[i][j] = std::tuple<char, double>{lattice[i][j], cell_sum};
+
         }
     }
 
@@ -129,7 +201,7 @@ std::vector<std::vector<std::tuple<char, double>>> Lattice::get_payoff_values()
 /**
 ** Update the board, which requires a board with the strategies and payoffs.
 **/
-std::vector<std::vector<char>> Lattice::update(std::vector<std::vector<std::tuple<char, double>>> payoff_board)
+std::vector<std::vector<char>> LatticeQObject::update(std::vector<std::vector<std::tuple<char, double>>> payoff_board)
 {
         std::vector<std::vector<char>> new_board;
     for (int i = 0; i < dimension; ++i)
@@ -152,7 +224,7 @@ std::vector<std::vector<char>> Lattice::update(std::vector<std::vector<std::tupl
             double payoff = std::get<1>(player);
             // Get all of the neighbours
             std::vector<std::vector<int>> neighbours = get_neighbours(player_idx);
-            
+
             // Loop around all the neighbours and find the maximum of the neighbours
             double best_payoff = payoff;
             char best_strat = strat;
@@ -174,26 +246,86 @@ std::vector<std::vector<char>> Lattice::update(std::vector<std::vector<std::tupl
 }
 
 
-void Lattice::simulate(const int t)
+void LatticeQObject::simulate()
 {
-    for (int i = 0; i < t; ++i)
+    const int time = t;
+    std::time_t t = std::time(nullptr);
+    std::tm tm = *std::localtime(&t);
+    char buffer[256];
+
+    strftime(buffer, sizeof(buffer), "%Y%b%d_%H%M%S", &tm);
+    QDir().mkdir(QDir::current().absolutePath() + "/" + QString(buffer));
+    for (int i = 0; i < time; ++i)
     {
-        std::cout << "-------------------------------------" << "BEGINNING OF T: " << i << "-------------------------------------" << std::endl;
+        set_status("Start of " +  QString::number(i) + " simulation....");
         old_lattice = lattice;
+
         std::vector<std::vector<std::tuple<char, double>>> payoff_board = get_payoff_values();
+
         lattice = update(payoff_board);
-        std::cout << "-------------------------------------" << "END OF T: " << i << "-------------------------------------" << std::endl;
+        set_status("End of " +  QString::number(i) + " simulation....");
+        print_lattice(QString(buffer) + "/" + QString::number(i));
     }
+
 }
 
-void Lattice::print_lattice()
+QString LatticeQObject::get_status()
 {
-    for (int i = 0; i < dimension; ++i)
-    {
-        for (int j = 0; j < dimension; ++j)
+    return this->status;
+}
+
+void LatticeQObject::set_status(QString status)
+{
+    this->status = status;
+    emit status_changed();
+}
+
+void LatticeQObject::print_lattice(QString time)
+{
+    QString img_path(QDir::current().absolutePath() + "/" + time + ".ppm");
+    qDebug() << img_path;
+    std::ofstream img;
+    img.open(img_path.toStdString());
+
+
+    if (img.is_open())
+    { // proceed with output
+        img << "P3" << std::endl;
+        img << dimension << " " << dimension << std::endl;
+        img << "255" << std::endl;
+
+        for (int i = 0; i < dimension; ++i)
         {
-            std::cout << lattice[i][j] << " ";
+            for (int j = 0; j < dimension; ++j)
+            {
+
+                if (lattice[i][j] == 'c')
+                {
+                    img << "0" << " " << "255" << " " << "0" << std::endl;
+                }
+                else if (lattice[i][j] == 'd')
+                {
+                    img << "255" << " " << "0" << " " << "0" << std::endl;
+                }
+            }
         }
-        std::cout << std::endl;
+        img.close();
+        set_status(QString("Image saved to " + img_path));
     }
+    else
+    {
+        set_status(QString("ERROR READING FILE"));
+    }
+    set_path("file:///" + img_path);
+    set_status(QString("END OF SIMULATION"));
+}
+
+void LatticeQObject::run_simulation()
+{
+    set_status(QString("Running Simulation...."));
+
+    LatticeThread* thread = new LatticeThread(this);
+
+    thread->start();
+
 }
