@@ -19,6 +19,8 @@ public:
     void set_e(double);
     void set_dimension(int);
 
+    void initialise_board();
+
     void simulate(std::string);
 
     void save_lattice(std::string);

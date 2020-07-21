@@ -35,7 +35,9 @@ public:
     Q_INVOKABLE QString get_e();
     Q_INVOKABLE QString get_dimension();
     Q_INVOKABLE void cancel();
+    void reset_lattice();
     QString get_path();
+    QMutex mutex;
 
 
 signals:

@@ -21,26 +21,63 @@ void LatticeQObject::initialise(int dimension, double b, double e, int t)
 
 void LatticeQObject::set_t(QString t)
 {
-   this->t = t.toInt();
-   set_status(QString("t changed to "+t+"...."));
+    bool ok;
+    int intTest = t.toInt(&ok);
+    if (ok)
+    {
+        this->t = intTest;
+        set_status(QString("t changed to "+t+"...."));
+    }
+    else
+    {
+        set_status(QString("Conversion to number failed..."));
+    }
+
 }
 
 void LatticeQObject::set_e(QString e)
 {
-    this->lattice->set_e(e.toDouble());
-    set_status(QString("e changed to "+e+"...."));
+    bool ok;
+    double doubleTest = e.toDouble(&ok);
+    if (ok)
+    {
+        lattice->set_e(doubleTest);
+        set_status(QString("e changed to "+e+"...."));
+    }
+    else
+    {
+        set_status(QString("Conversion to number failed..."));
+    }
 }
 
 void LatticeQObject::set_b(QString b)
 {
-    this->lattice->set_b(b.toDouble());
-    set_status(QString("t changed to "+b+"...."));
+    bool ok;
+    double doubleTest = b.toDouble(&ok);
+    if (ok)
+    {
+        lattice->set_b(doubleTest);
+        set_status(QString("b changed to "+b+"...."));
+    }
+    else
+    {
+        set_status(QString("Conversion to number failed..."));
+    }
 }
 
 void LatticeQObject::set_dimension(QString dimension)
 {
-    this->lattice->set_dimension(dimension.toInt());
-    set_status(QString("t changed to "+dimension+"...."));
+    bool ok;
+    double intTest = dimension.toDouble(&ok);
+    if (ok)
+    {
+        lattice->set_dimension(intTest);
+        set_status(QString("dimension changed to "+dimension+"...."));
+    }
+    else
+    {
+        set_status(QString("Conversion to number failed..."));
+    }
 }
 
 QString LatticeQObject::get_t()
@@ -79,8 +116,19 @@ void LatticeQObject::cancel()
     stop = true;
 }
 
+void LatticeQObject::reset_lattice()
+{
+    int dimension = lattice->get_dimension();
+    double b = lattice->get_b();
+    double e = lattice->get_e();
+    delete lattice;
+    lattice = new Lattice(dimension, b, e);
+}
+
 void LatticeQObject::simulate()
 {
+    mutex.lock();
+    set_status(QString("Running Simulation...."));
     stop = false;
     std::time_t time = std::time(nullptr);
     std::tm tm = *std::localtime(&time);
@@ -94,11 +142,9 @@ void LatticeQObject::simulate()
     {
         if(stop)
         {
-            int dimension = lattice->get_dimension();
-            double b = lattice->get_b();
-            double e = lattice->get_e();
-            delete lattice;
-            lattice = new Lattice(dimension, b, e);
+            reset_lattice();
+            set_status(QString("STOPPING..."));
+            mutex.unlock();
             return;
         }
         set_status("Start of " +  QString::number(i) + " simulation....");
@@ -117,6 +163,7 @@ void LatticeQObject::simulate()
     }
 
     set_status(QString("END OF SIMULATION"));
+    mutex.unlock();
 }
 
 QString LatticeQObject::get_status()
@@ -133,8 +180,6 @@ void LatticeQObject::set_status(QString status)
 
 void LatticeQObject::run_simulation()
 {
-    set_status(QString("Running Simulation...."));
-
     LatticeThread* thread = new LatticeThread(this);
 
     thread->start();
@@ -145,6 +190,7 @@ void LatticeQObject::show_lattice()
 {
     QString img_path(QDir::current().absolutePath() + "/current_board.ppm");
     lattice->save_lattice(img_path.toStdString());
+    set_path("");
     set_path("file:///" + img_path);
 }
 

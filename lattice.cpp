@@ -1,4 +1,5 @@
 #include "lattice.h"
+#include <QDebug>
 
 Lattice::Lattice(int dimension, double b, double e)
 {
@@ -11,18 +12,7 @@ Lattice::Lattice(int dimension, double b, double e)
     payoff_matrix.push_back(payoff_row1);
     payoff_matrix.push_back(payoff_row2);
 
-    for (int i = 0; i < dimension; ++i)
-    {
-        std::vector<char> temp;
-
-        for (int j = 0; j < dimension; ++j)
-        {
-            temp.push_back('c');
-        }
-        lattice.push_back(temp);
-    }
-
-    lattice[(int)((dimension-1)/2)][(int)((dimension-1)/2)] = 'd';
+    initialise_board();
 }
 
 void Lattice::set_e(double e)
@@ -37,8 +27,27 @@ void Lattice::set_b(double b)
 
 void Lattice::set_dimension(int dimension)
 {
+    qDebug() << dimension;
     this->dimension = dimension;
+    initialise_board();
 
+}
+
+void Lattice::initialise_board()
+{
+    lattice.clear();
+    for (int i = 0; i < dimension; ++i)
+    {
+        std::vector<char> temp;
+
+        for (int j = 0; j < dimension; ++j)
+        {
+            temp.push_back('c');
+        }
+        lattice.push_back(temp);
+    }
+
+    lattice[(int)((dimension-1)/2)][(int)((dimension-1)/2)] = 'd';
 }
 
 double Lattice::get_e()

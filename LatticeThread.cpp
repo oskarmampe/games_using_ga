@@ -8,4 +8,5 @@ LatticeThread::LatticeThread(LatticeQObject* new_lattice)
 void LatticeThread::run()
 {
     lattice->simulate();
+    lattice->reset_lattice();
 }
