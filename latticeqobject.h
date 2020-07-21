@@ -4,15 +4,13 @@
 #include <QObject>
 #include <QDebug>
 #include <QUrl>
-
-#include <tuple>
+#include <QDir>
+#include <chrono>
+#include <ctime>
 #include <string>
 #include <vector>
-#include <tuple>
-#include <iostream>
-#include <fstream>
 
-
+#include "lattice.h"
 class LatticeQObject : public QObject
 {
     Q_OBJECT
@@ -24,17 +22,19 @@ public:
     void simulate();
     QString get_status();
     Q_INVOKABLE void run_simulation();
+    Q_INVOKABLE void show_lattice();
+    Q_INVOKABLE void change_lattice(QString, QString, QString);
     Q_INVOKABLE void set_t(QString);
     Q_INVOKABLE void set_b(QString);
     Q_INVOKABLE void set_e(QString);
     Q_INVOKABLE void set_dimension(QString);
     void set_status(QString);
     void set_path(QString);
-
     Q_INVOKABLE QString get_t();
     Q_INVOKABLE QString get_b();
     Q_INVOKABLE QString get_e();
     Q_INVOKABLE QString get_dimension();
+    Q_INVOKABLE void cancel();
     QString get_path();
 
 
@@ -45,24 +45,11 @@ signals:
 public slots:
 
 private:
-    int dimension;
-    double e;
-    double b;
-    int t;
     QString status;
     QString path;
-
-    std::vector<std::vector<char>> lattice;
-    std::vector<std::vector<char>> old_lattice;
-    std::vector<std::vector<double>> payoff_matrix;
-
-    std::vector<std::vector<int>> get_neighbours(std::vector<int>);
-    double play_with_neighbours(char, std::vector<char>);
-    std::vector<std::vector<std::tuple<char, double>>> get_payoff_values();
-    std::vector<std::vector<char>> update(std::vector<std::vector<std::tuple<char, double>>>);
-    void print_lattice(QString);
-
-
+    int t;
+    Lattice* lattice;
+    bool stop;
 };
 
 #endif // LATTICEQOBJECT_H

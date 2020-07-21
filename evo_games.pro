@@ -15,6 +15,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         LatticeThread.cpp \
+        genetic_algorithm.cpp \
+        geneticindividual.cpp \
+        geneticpopulation.cpp \
+        lattice.cpp \
         latticeqobject.cpp \
         main.cpp
 
@@ -33,4 +37,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     LatticeThread.h \
+    genetic_algorithm.h \
+    geneticindividual.h \
+    geneticpopulation.h \
+    lattice.h \
     latticeqobject.h

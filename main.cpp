@@ -4,6 +4,7 @@
 #include <QQmlContext>
 
 #include "latticeqobject.h"
+#include "genetic_algorithm.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,10 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<LatticeQObject>("App", 1, 0, "LatticeQObject", "");
 
     lattice->initialise(300, 1.65, 0, 64);
+
+    GeneticAlgorithm ga;
+
+    ga.simulate();
 
     QQmlApplicationEngine engine;
 
