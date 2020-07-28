@@ -5,12 +5,13 @@
 #include <QDebug>
 #include <QUrl>
 #include <QDir>
+#include <QMutex>
 #include <chrono>
 #include <ctime>
 #include <string>
 #include <vector>
 
-#include "lattice.h"
+#include "geneticlattice.h"
 class LatticeQObject : public QObject
 {
     Q_OBJECT
@@ -50,7 +51,7 @@ private:
     QString status;
     QString path;
     int t;
-    Lattice* lattice;
+    GeneticLattice* lattice;
     bool stop;
 };
 

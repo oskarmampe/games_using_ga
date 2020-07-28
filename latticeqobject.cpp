@@ -14,7 +14,7 @@ void LatticeQObject::initialise(int dimension, double b, double e, int t)
     payoff_matrix.push_back(payoff_row1);
     payoff_matrix.push_back(payoff_row2);
 
-    lattice = new Lattice(dimension, b, e);
+    lattice = new GeneticLattice(dimension, b, e);
 
     set_status(QString("Press \"Simulate\" to begin...."));
 }
@@ -122,7 +122,7 @@ void LatticeQObject::reset_lattice()
     double b = lattice->get_b();
     double e = lattice->get_e();
     delete lattice;
-    lattice = new Lattice(dimension, b, e);
+    lattice = new GeneticLattice(dimension, b, e);
 }
 
 void LatticeQObject::simulate()
@@ -196,9 +196,21 @@ void LatticeQObject::show_lattice()
 
 void LatticeQObject::change_lattice(QString x, QString y, QString c)
 {
-    QString img_path(QDir::current().absolutePath() + "/current_board.ppm");
-    lattice->change_lattice(x.toInt(), y.toInt(), c.toStdString().data()[0]);
-    QDir().remove(img_path);
-    set_path("");
-    show_lattice();
+    bool xok;
+    bool yok;
+    double xInt = x.toInt(&xok);
+    double yInt = y.toInt(&yok);
+    if (xok && yok)
+    {
+        QString img_path(QDir::current().absolutePath() + "/current_board.ppm");
+        lattice->change_lattice(xInt, yInt, c.toStdString().data()[0]);
+        QDir().remove(img_path);
+        set_path("");
+        show_lattice();
+    }
+    else
+    {
+        set_status(QString("Conversion to number failed..."));
+    }
+
 }

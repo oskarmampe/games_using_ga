@@ -8,6 +8,7 @@
 
 int main(int argc, char *argv[])
 {
+    srand(time(NULL));
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
@@ -18,9 +19,9 @@ int main(int argc, char *argv[])
 
     lattice->initialise(300, 1.65, 0, 64);
 
-    GeneticAlgorithm ga;
+//    GeneticAlgorithm ga;
 
-    ga.simulate();
+//    ga.simulate();
 
     QQmlApplicationEngine engine;
 

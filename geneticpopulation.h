@@ -7,16 +7,19 @@
 class GeneticPopulation
 {
 public:
-    GeneticPopulation();
-    GeneticIndividual get_fittest();
-    void intitialise();
-    struct compare_class {
-      bool operator() (GeneticIndividual i,GeneticIndividual j) { return (i.fitness_function()>j.fitness_function());}
-    } compare;
-    std::vector<GeneticIndividual> individuals;
+//    GeneticPopulation(int, int);
+//    void get_fittest();
+//    struct compare_class {
+//      bool operator() (GeneticIndividual i,GeneticIndividual j) { return (i.fitness_function()>j.fitness_function());}
+//    } compare;
+//    GeneticIndividual* get_individual(int);
+//    int get_size();
+//    int get_gene_size();
 
-private:
-    //
+
+//private:
+//    std::vector<GeneticIndividual> individuals;
+//    int gene_size;
 };
 
 #endif // GENETICPOPULATION_H

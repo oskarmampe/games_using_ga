@@ -17,6 +17,7 @@ SOURCES += \
         LatticeThread.cpp \
         genetic_algorithm.cpp \
         geneticindividual.cpp \
+        geneticlattice.cpp \
         geneticpopulation.cpp \
         lattice.cpp \
         latticeqobject.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     LatticeThread.h \
     genetic_algorithm.h \
     geneticindividual.h \
+    geneticlattice.h \
     geneticpopulation.h \
     lattice.h \
     latticeqobject.h
