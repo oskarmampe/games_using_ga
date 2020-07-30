@@ -48,8 +48,16 @@ void GeneticLattice::initialise_board(GeneticIndividual::ENCODING encoding)
         }
         lattice.push_back(temp);
     }
-
-    lattice[(int)((dimension-1)/2)][(int)((dimension-1)/2)] = GeneticIndividual(encoding, 'd');
+    int half = (int)((dimension-1)/2);
+    lattice.at(half-1).at(half-1) = GeneticIndividual(encoding, 'd');
+    lattice.at(half-1).at(half) = GeneticIndividual(encoding, 'd');
+    lattice.at(half-1).at(half+1) = GeneticIndividual(encoding, 'd');
+    lattice.at(half).at(half-1) = GeneticIndividual(encoding, 'd');
+    lattice.at(half).at(half+1) = GeneticIndividual(encoding, 'd');
+    lattice.at(half+1).at(half-1) = GeneticIndividual(encoding, 'd');
+    lattice.at(half+1).at(half) = GeneticIndividual(encoding, 'd');
+    lattice.at(half+1).at(half+1) = GeneticIndividual(encoding, 'd');
+    lattice.at(half).at(half) = GeneticIndividual(encoding, 'd');
 }
 
 double GeneticLattice::get_e()
@@ -92,11 +100,11 @@ void GeneticLattice::save_lattice(std::string path)
             for (int j = 0; j < dimension; ++j)
             {
 
-                if (lattice[i][j].get_strategy() == 'c')
+                if (lattice.at(i).at(j).get_strategy() == 'c')
                 {
                     img << "0" << " " << "255" << " " << "0" << std::endl;
                 }
-                else if (lattice[i][j].get_strategy() == 'd')
+                else if (lattice.at(i).at(j).get_strategy() == 'd')
                 {
                     img << "255" << " " << "0" << " " << "0" << std::endl;
                 }
@@ -112,5 +120,5 @@ void GeneticLattice::save_lattice(std::string path)
 
 void GeneticLattice::change_lattice(int x, int y, char c)
 {
-    lattice[x][y].set_strategy(c);
+    lattice.at(x).at(y).set_strategy(c);
 }

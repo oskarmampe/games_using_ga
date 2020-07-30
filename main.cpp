@@ -19,10 +19,6 @@ int main(int argc, char *argv[])
 
     lattice->initialise(300, 1.65, 0, 64);
 
-//    GeneticAlgorithm ga;
-
-//    ga.simulate();
-
     QQmlApplicationEngine engine;
 
 

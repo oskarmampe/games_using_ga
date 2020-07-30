@@ -13,8 +13,6 @@ std::vector<std::vector<GeneticIndividual>> GeneticAlgorithm::simulate(std::vect
     this->lattice = lattice;
     qDebug() << "SELECTION";
     selection();
-    qDebug() << "CROSSOVER";
-    crossover();
 
     if (rand() % 1000 + 1 == 7)
     {
@@ -25,6 +23,15 @@ std::vector<std::vector<GeneticIndividual>> GeneticAlgorithm::simulate(std::vect
     return this->lattice;
 }
 
+/**
+ *
+ * LOOP AROUND NEIGHBOURHOOD
+ * SORT EVERYONE BY FITNESS
+ * REMOVE 2, SELECT 4 RANDOM PARENTS TO MAKE 2
+ * MUTATE THEM
+ *
+ * @brief GeneticAlgorithm::selection
+ */
 void GeneticAlgorithm::selection()
 {
     std::vector<std::vector<GeneticIndividual>> current = lattice;
@@ -48,6 +55,42 @@ void GeneticAlgorithm::selection()
             lattice[i][j].play(players, payoff_matrix);
         }
     }
+
+    for (int i = 0; i < dimension; ++i)
+    {
+        for (int j = 0; j < dimension; ++j)
+        {
+            // Get the player index and strategy
+            std::vector<int> player_idx = {i ,j};
+
+            std::vector<std::vector<int>> neighbours = get_neighbours(player_idx);
+
+            // Get all neighbour strategies
+            std::vector<GeneticIndividual> players;
+            for (auto &idx : neighbours)
+            {
+                players.push_back(current[idx[0]][idx[1]]);
+            }
+            players.push_back(current[i][j]);
+
+            // Get the payoff of the cell
+            std::sort(players.begin(), players.end(), compare);
+
+            // Get random number
+            std::random_device device;
+            std::mt19937 engine(device()); // Seed the random number engine
+            std::discrete_distribution<> dist({players.at(0).get_fitness(), players.at(1).get_fitness(),
+                                               players.at(2).get_fitness(), players.at(3).get_fitness(),
+                                               players.at(4).get_fitness(), players.at(5).get_fitness(),
+                                               players.at(6).get_fitness(), players.at(7).get_fitness(),
+                                               players.at(8).get_fitness()}); // Create the distribution
+
+            std::vector<GeneticIndividual> parents;
+            parents.push_back(players.at(dist(engine)));
+            parents.push_back(players.at(dist(engine)));
+            lattice.at(i).at(j) = crossover(parents);
+        }
+    }
 }
 
 void GeneticAlgorithm::mutation()
@@ -55,9 +98,12 @@ void GeneticAlgorithm::mutation()
 
 }
 
-void GeneticAlgorithm::crossover()
+GeneticIndividual GeneticAlgorithm::crossover(std::vector<GeneticIndividual> parents)
 {
-
+    if (parents.at(0).get_encoding() == GeneticIndividual::AUTOMATA)
+    {
+        return parents.at(0).get_random_number(10) <= 5 ? parents.at(0) : parents.at(1);
+    }
 }
 
 

@@ -16,11 +16,13 @@ public:
     //GeneticIndividual(bool*, ENCODING);
     double fitness_function(std::vector<char>, std::vector<std::vector<double>>);
     int get_gene_size();
-    bool* genes;
     int get_random_number(int);
-    void set_strategy(char);
     char get_strategy();
+    double get_fitness();
+    ENCODING get_encoding();
+    void set_strategy(char);
     void play(std::vector<char>, std::vector<std::vector<double>>);
+    bool* genes;
 
 private:
     void encode();
@@ -34,6 +36,7 @@ private:
     std::map<std::string, int> attributes;
     char strategy;
     int gene_size;
+    double fitness;
 
 };
 

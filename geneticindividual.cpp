@@ -80,6 +80,7 @@ void GeneticIndividual::encode(){
     {
         //current strategy 1 initial state, 2 current strategies, 4 moves to another state
         gene_size = 1+2*2+4*2;
+        genes = new bool[gene_size];
         bool cooperate[]{false, false, false, false, true, true, true};
         bool defect[]{true, true, true, true, false, false, false};
         //bool tft[]{false, false, false, true, true, false, true};
@@ -115,6 +116,22 @@ void GeneticIndividual::make_automata()
     automata.insert(std::make_pair(!genes[0], other_inner));
     automata_values[initial_state] = genes[1] == false ? 'c' : 'd';
     automata_values[(int)!genes[0]] = genes[4] == false ? 'c' : 'd';
+
+    if (this->strategy == 'd')
+    {
+        qDebug() << "(int)!genes[0]" << QString::number((int)!genes[0]);
+        qDebug() << "Initial State: " << QString::number(initial_state);
+        for (auto it = automata.cbegin(); it != automata.cend(); ++it)
+        {
+            qDebug() << "First" << it->first;
+
+            for (auto it1 = it->second.cbegin(); it1 != it->second.cend(); ++it1)
+            {
+                qDebug() << "First First" << it1->first;
+                qDebug() << "First Second" << it1->first;
+            }
+        }
+    }
 }
 
 void GeneticIndividual::traverse_automata(std::vector<char> neighbours)
@@ -142,7 +159,8 @@ void GeneticIndividual::initialise()
 
 void GeneticIndividual::play(std::vector<char> neighbours, std::vector<std::vector<double>> payoff_matrix)
 {
-    double fitness = fitness_function(neighbours, payoff_matrix);
+    fitness = fitness_function(neighbours, payoff_matrix);
+    qDebug() << QString::number(fitness);
     if (this->current == CELLSTATE)
     {
         // update genes
@@ -182,6 +200,16 @@ char GeneticIndividual::get_strategy()
     {
         return automata_values[state];
     }
+}
+
+double GeneticIndividual::get_fitness()
+{
+    return fitness;
+}
+
+GeneticIndividual::ENCODING GeneticIndividual::get_encoding()
+{
+    return current;
 }
 
 
