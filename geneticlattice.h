@@ -15,14 +15,17 @@ public:
     double get_b();
     double get_e();
     int get_dimension();
+    GeneticIndividual::ENCODING get_encoding();
 
     void set_b(double);
     void set_e(double);
     void set_dimension(int);
+    void set_encoding(GeneticIndividual::ENCODING);
+
 
     void initialise_board(GeneticIndividual::ENCODING);
 
-    void simulate(std::string);
+    void simulate(std::string, int, int, bool, bool);
 
     void save_lattice(std::string);
     void change_lattice(int, int, char);

@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.3
 
 ApplicationWindow {
     visible: true
-    width: 1280
-    height: 960
+    width: 1680
+    height: 1050
     title: qsTr("Evolutionary Games")
 
     GridLayout {
@@ -136,7 +136,7 @@ ApplicationWindow {
             id: changeButton
             width: 124
             height: 48
-            text: qsTr("Change")
+            text: qsTr("Change Cell")
             onClicked: lattice.change_lattice(xTF.text, yTF.text, cTF.text)
             Layout.row: 7
             Layout.column: 1
@@ -244,6 +244,104 @@ ApplicationWindow {
             Layout.column: 2
             Layout.columnSpan: 6
         }
+
+
+        Button {
+            id: updateButton
+            width: 124
+            height: 48
+            text: qsTr("Update Params")
+            onClicked: lattice.change_ga(encodingCMB.currentText, childrenTF.text, parentTF.text, neighbourSwitch.checked, mutationSwitch.checked)
+            Layout.row: 8
+            Layout.column: 0
+            Layout.leftMargin: 4
+        }
+
+        Label {
+            id: encodingLabel
+            x: 1129
+            y: 840
+            width: 7
+            height: 17
+            text: qsTr("Encoding:")
+            Layout.row: 8
+            Layout.column: 1
+            Layout.alignment: Qt.AlignRight
+        }
+
+        ComboBox {
+          id: encodingCMB
+          model: [ "CELLSTATE", "AUTOMATA", "ATTRIBUTE" ]
+          currentIndex: lattice.get_encoding()
+          Layout.row: 8
+          Layout.column: 2
+          font.pointSize: 10
+          editable: false
+        }
+
+        Label {
+            id: childrenLabel
+            x: 1129
+            y: 840
+            width: 7
+            height: 17
+            text: qsTr("Children:")
+            Layout.row: 8
+            Layout.column: 3
+            Layout.alignment: Qt.AlignRight
+        }
+
+        TextField {
+            id: childrenTF
+            x: 1129
+            y: 800
+            text: lattice.get_children()
+            Layout.row: 8
+            Layout.column: 4
+        }
+
+        Label {
+            id: parentsLabel
+            x: 1129
+            y: 840
+            width: 7
+            height: 17
+            text: qsTr("Parents:")
+            Layout.row: 8
+            Layout.column: 5
+            Layout.alignment: Qt.AlignRight
+        }
+
+        TextField {
+            id: parentTF
+            x: 1129
+            y: 800
+            text: lattice.get_parent()
+            Layout.row: 8
+            Layout.column: 6
+        }
+
+
+        Switch {
+            id: neighbourSwitch
+            x: 165
+            y: 180
+            text: qsTr("Global")
+            Layout.row: 8
+            Layout.column: 7
+            checked: lattice.get_global_pop()
+        }
+
+        Switch {
+            id: mutationSwitch
+            x: 165
+            y: 180
+            text: qsTr("Mutation")
+            Layout.row: 8
+            Layout.column: 8
+            checked: lattice.get_mutation()
+        }
+
     }
 }
 

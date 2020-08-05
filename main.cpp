@@ -8,7 +8,6 @@
 
 int main(int argc, char *argv[])
 {
-    srand(time(NULL));
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
@@ -17,7 +16,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterUncreatableType<LatticeQObject>("App", 1, 0, "LatticeQObject", "");
 
-    lattice->initialise(300, 1.65, 0, 64);
+    lattice->initialise(300, 1.65, 0, 64, 100, 80, true, false);
 
     QQmlApplicationEngine engine;
 

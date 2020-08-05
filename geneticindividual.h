@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <QDebug>
+#include <random>
 class GeneticIndividual
 {
     // 0 cooperate 1 defect
@@ -16,7 +17,6 @@ public:
     //GeneticIndividual(bool*, ENCODING);
     double fitness_function(std::vector<char>, std::vector<std::vector<double>>);
     int get_gene_size();
-    int get_random_number(int);
     char get_strategy();
     double get_fitness();
     ENCODING get_encoding();
@@ -33,7 +33,6 @@ private:
     std::map<int, std::map<int,int>> automata;
     char automata_values[2];
     ENCODING current;
-    std::map<std::string, int> attributes;
     char strategy;
     int gene_size;
     double fitness;

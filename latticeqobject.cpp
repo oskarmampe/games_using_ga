@@ -5,16 +5,15 @@ LatticeQObject::LatticeQObject(QObject *parent) : QObject(parent)
 {
 
 }
-void LatticeQObject::initialise(int dimension, double b, double e, int t)
+void LatticeQObject::initialise(int dimension, double b, double e, int t, int parents, int children, bool global_pop, bool mut)
 {
-    std::vector<std::vector<double>> payoff_matrix;
-    std::vector<double> payoff_row1{1., 0.};
-    std::vector<double> payoff_row2{b, e};
     this->t = t;
-    payoff_matrix.push_back(payoff_row1);
-    payoff_matrix.push_back(payoff_row2);
-
+    this->parents = parents;
+    this->children = children;
+    this->global_pop = global_pop;
+    this->mut = mut;
     lattice = new GeneticLattice(dimension, b, e);
+
 
     set_status(QString("Press \"Simulate\" to begin...."));
 }
@@ -68,7 +67,7 @@ void LatticeQObject::set_b(QString b)
 void LatticeQObject::set_dimension(QString dimension)
 {
     bool ok;
-    double intTest = dimension.toDouble(&ok);
+    int intTest = dimension.toInt(&ok);
     if (ok)
     {
         lattice->set_dimension(intTest);
@@ -78,6 +77,63 @@ void LatticeQObject::set_dimension(QString dimension)
     {
         set_status(QString("Conversion to number failed..."));
     }
+}
+
+void LatticeQObject::set_encoding(QString encoding)
+{
+    if (encoding == "CELLSTATE")
+    {
+        lattice->set_encoding(GeneticIndividual::CELLSTATE);
+    }
+    else if(encoding == "AUTOMATA")
+    {
+        lattice->set_encoding(GeneticIndividual::AUTOMATA);
+    }
+    else if(encoding == "ATTRIBUTE")
+    {
+        lattice->set_encoding(GeneticIndividual::ATTRIBUTE);
+    }
+
+}
+
+void LatticeQObject::set_parent(QString parents)
+{
+    bool ok;
+    int intTest = parents.toInt(&ok);
+    if (ok)
+    {
+        this->parents = intTest;
+        set_status(QString("dimension changed to "+parents+"...."));
+    }
+    else
+    {
+        set_status(QString("Conversion to number failed..."));
+    }
+}
+
+void LatticeQObject::set_children(QString children)
+{
+    bool ok;
+    int intTest = children.toInt(&ok);
+    if (ok)
+    {
+        this->children = intTest;
+        set_status(QString("dimension changed to "+children+"...."));
+    }
+    else
+    {
+        set_status(QString("Conversion to number failed..."));
+    }
+}
+
+void LatticeQObject::set_global_pop(bool global_pop)
+{
+    this->global_pop = global_pop;
+}
+
+void LatticeQObject::set_mutation(bool mut)
+{
+    this->mut = mut;
 }
 
 QString LatticeQObject::get_t()
@@ -90,6 +146,22 @@ QString LatticeQObject::get_e()
     return QString::number(this->lattice->get_e());
 }
 
+int LatticeQObject::get_encoding()
+{
+    if(lattice->get_encoding() == GeneticIndividual::CELLSTATE)
+    {
+        return 0;
+    }
+    else if(lattice->get_encoding() == GeneticIndividual::AUTOMATA)
+    {
+        return 1;
+    }
+    else if(lattice->get_encoding() == GeneticIndividual::ATTRIBUTE)
+    {
+        return 2;
+    }
+}
+
 QString LatticeQObject::get_b()
 {
     return QString::number(this->lattice->get_b());
@@ -98,6 +170,26 @@ QString LatticeQObject::get_b()
 QString LatticeQObject::get_dimension()
 {
     return QString::number(this->lattice->get_dimension());
+}
+
+QString LatticeQObject::get_parent()
+{
+    return QString::number(parents);
+}
+
+QString LatticeQObject::get_children()
+{
+    return QString::number(children);
+}
+
+bool LatticeQObject::get_global_pop()
+{
+    return global_pop;
+}
+
+bool LatticeQObject::get_mutation()
+{
+    return this->mut;
 }
 
 QString LatticeQObject::get_path()
@@ -151,7 +243,7 @@ void LatticeQObject::simulate()
         QString img_path(QDir::current().absolutePath() + "/" + QString(buffer) + "/" + QString::number(i) + ".ppm");
         try
         {
-            lattice->simulate(img_path.toStdString());
+            lattice->simulate(img_path.toStdString(), parents, children, global_pop, mut);
         }
         catch (std::runtime_error &er)
         {
@@ -192,6 +284,15 @@ void LatticeQObject::show_lattice()
     lattice->save_lattice(img_path.toStdString());
     set_path("");
     set_path("file:///" + img_path);
+}
+
+void LatticeQObject::change_ga(QString encoding, QString children, QString parent, bool global, bool mut)
+{
+    set_encoding(encoding);
+    set_children(children);
+    set_parent(parent);
+    set_global_pop(global);
+    set_mutation(mut);
 }
 
 void LatticeQObject::change_lattice(QString x, QString y, QString c)

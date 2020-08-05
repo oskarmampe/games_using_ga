@@ -34,19 +34,27 @@ double GeneticIndividual::fitness_function(std::vector<char> neighbours, std::ve
         result += payoff_matrix[player_strat][enemy_strat];
     }
 
+    if (current == GeneticIndividual::CELLSTATE)
+    {
+        for (int i = 1; i < get_gene_size(); ++i)
+        {
+            result += payoff_matrix[player_strat][(size_t)genes[i]];
+        }
+    }
+    else if (current == GeneticIndividual::ATTRIBUTE)
+    {
+        for (int i = 1; i < get_gene_size()-6; ++i)
+        {
+            result += payoff_matrix[player_strat][(size_t)genes[i]];
+        }
+    }
+
     return result;
 }
 
 int GeneticIndividual::get_gene_size()
 {
     return gene_size;
-}
-
-int GeneticIndividual::get_random_number(int max)
-{
-
-    return rand() % max + 1;
-
 }
 
 void GeneticIndividual::set_strategy(char strategy)
@@ -56,6 +64,9 @@ void GeneticIndividual::set_strategy(char strategy)
 }
 
 void GeneticIndividual::encode(){
+    static std::random_device device;
+    std::mt19937 engine(device());
+    std::uniform_int_distribution<> dist(0, 1);
     if (this->current == CELLSTATE)
     {
         // current strategy previous 2 strategies of 8 neighbours + 2 previous strategies of the cell
@@ -63,17 +74,17 @@ void GeneticIndividual::encode(){
         genes = new bool[gene_size];
         for (int i = 0; i < get_gene_size(); ++i)
         {
-            genes[i] = get_random_number(10) <= 5 ? false : true;
+            genes[i] = dist(engine) == 0 ? false : true;
         }
     }
     else if (this->current == ATTRIBUTE)
     {
-        // current strategy previous 2 strategies of 8 neighbours + 2 previous strategies of the cell + 3 attributes
-        gene_size = 1+8*2+2*2+2*3;
+        // current strategy previous 2 strategies of 8 neighbours + 2 previous strategies of the cell + 2 attributes
+        gene_size = 1+8*2+2*2+3*2;
         genes = new bool[gene_size];
         for (int i = 0; i < get_gene_size(); ++i)
         {
-            genes[i] = get_random_number(10) <= 5 ? false : true;
+            genes[i] = dist(engine) == 0 ? false : true;
         }
     }
     else if (this->current == AUTOMATA)
@@ -117,7 +128,7 @@ void GeneticIndividual::make_automata()
     automata_values[initial_state] = genes[1] == false ? 'c' : 'd';
     automata_values[(int)!genes[0]] = genes[4] == false ? 'c' : 'd';
 
-    if (this->strategy == 'd')
+    if (get_strategy() == 'd')
     {
         qDebug() << "(int)!genes[0]" << QString::number((int)!genes[0]);
         qDebug() << "Initial State: " << QString::number(initial_state);
@@ -146,38 +157,68 @@ void GeneticIndividual::traverse_automata(std::vector<char> neighbours)
 void GeneticIndividual::initialise()
 {
     encode();
+    static std::random_device device;
+    std::mt19937 engine(device());
+    std::uniform_int_distribution<> dist(0, 4);
     if(this->current == ATTRIBUTE)
     {
-        attributes.insert(std::pair<std::string, int>("aggressiveness", get_random_number(4)));
-        attributes.insert(std::pair<std::string, int>("deffensive", get_random_number(4)));
+        genes[0] = this->strategy == 'c' ? 0 : 1;
     }
     else if (this->current == AUTOMATA)
     {
         make_automata();
+    }
+    else if (this->current == CELLSTATE)
+    {
+        genes[0] = this->strategy == 'c' ? 0 : 1;
     }
 }
 
 void GeneticIndividual::play(std::vector<char> neighbours, std::vector<std::vector<double>> payoff_matrix)
 {
     fitness = fitness_function(neighbours, payoff_matrix);
-    qDebug() << QString::number(fitness);
+  //  qDebug() << QString::number(fitness);
     if (this->current == CELLSTATE)
     {
         // update genes
-        if (fitness < 8)
+        int c = 1;
+        for (auto& neighbour : neighbours)
         {
-            this->strategy = this->strategy == 'c' ? 'd' : 'c';
+            genes[c] = neighbour == 'c' ? 0 : 1;
+            c += 2;
         }
+
     }
     else if (this->current == ATTRIBUTE)
     {
-        if (fitness < 8 && attributes["aggressive"] > 5)
-        {
-            this->strategy = 'd';
+        for (int i = get_gene_size()-1; i > 0; --i) {
+            genes[i+1] = genes[i];
         }
-        else if (fitness < 8 && attributes["defensive"] > 5)
+
+        int c = 1;
+        for (auto& neighbour : neighbours)
         {
-            this->strategy = 'c';
+            genes[c] = neighbour == 'c' ? 0 : 1;
+            c += 2;
+        }
+        int aggr;
+        int def;
+
+        aggr |= genes[get_gene_size()-6] << 3;
+        aggr |= genes[get_gene_size()-5] << 2;
+        aggr |= genes[get_gene_size()-4] << 1;
+
+        def |= genes[get_gene_size()-3] << 3;
+        def |= genes[get_gene_size()-2] << 2;
+        def |= genes[get_gene_size()-1] << 1;
+
+        if (aggr >= 4)
+        {
+            genes[0] = true;
+        }
+        else if (def >= 4)
+        {
+            genes[0] = false;
         }
     }
     else if (this->current == AUTOMATA)
