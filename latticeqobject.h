@@ -41,6 +41,8 @@ public:
     void set_status(QString);
     void set_path(QString);
 
+    GeneticIndividual get_cell(int, int);
+
     Q_INVOKABLE QString get_t();
     Q_INVOKABLE QString get_b();
     Q_INVOKABLE QString get_e();
@@ -50,9 +52,11 @@ public:
     Q_INVOKABLE QString get_children();
     Q_INVOKABLE bool get_global_pop();
     Q_INVOKABLE bool get_mutation();
+    Q_INVOKABLE void test();
 
     Q_INVOKABLE void cancel();
-    void reset_lattice();
+
+    void reset_lattice(bool);
     QString get_path();
     QMutex mutex;
 
@@ -64,6 +68,8 @@ signals:
 public slots:
 
 private:
+    void simulate_test();
+    void test_batch();
     QString status;
     QString path;
     int t;

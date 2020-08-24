@@ -1,10 +1,27 @@
 #include "genetic_algorithm.h"
 
+/**
+ *
+ * Constructor
+ *
+ * @brief GeneticAlgorithm::GeneticAlgorithm
+ */
 GeneticAlgorithm::GeneticAlgorithm()
 {
     generation = 0;
 }
 
+/**
+ * @brief GeneticAlgorithm::simulate
+ * @param dimension
+ * @param payoff_matrix
+ * @param lattice: lattice of GeneticIndividuals
+ * @param global_pop: global or local/neighbourhood
+ * @param parent_num: number of parents
+ * @param child_num: number of children
+ * @param mut: mutation on or off
+ * @return
+ */
 std::vector<std::vector<GeneticIndividual>> GeneticAlgorithm::simulate(int dimension, std::vector<std::vector<double>> payoff_matrix, std::vector<std::vector<GeneticIndividual>> lattice, bool global_pop, int parent_num, int child_num, bool mut)
 {
     this->dimension = dimension;
@@ -23,12 +40,13 @@ std::vector<std::vector<GeneticIndividual>> GeneticAlgorithm::simulate(int dimen
 
 /**
  *
- * LOOP AROUND NEIGHBOURHOOD
- * SORT EVERYONE BY FITNESS
- * REMOVE 2, SELECT 4 RANDOM PARENTS TO MAKE 2
- * MUTATE THEM
+ * Loop around neighbourhood/global lattice
+ * Sort every individual by fitness
+ * Replace children with parents
+ * Mutation if turned on
  *
  * @brief GeneticAlgorithm::selection
+ * @param global_pop: global or local/neighbourhood
  */
 void GeneticAlgorithm::selection(bool global_pop)
 {
@@ -63,7 +81,12 @@ void GeneticAlgorithm::selection(bool global_pop)
     }
 }
 
-
+/**
+ *
+ * One of the possible populations. Loops around the neighbourhood, gets the best parents, and performs crossover/mutation
+ *
+ * @brief GeneticAlgorithm::neighbourhood_pop
+ */
 void GeneticAlgorithm::neighbourhood_pop()
 {
 
@@ -89,23 +112,23 @@ void GeneticAlgorithm::neighbourhood_pop()
 
             std::vector<double> fitness_values;
 
+            // Check if number of parents is not higher than dimension
             int loop_num = parent_num <= players.size() && parent_num > 0 ? parent_num : players.size();
 
+            // Get all fitness values of individuals
             for (int i  = 0; i < loop_num; ++i)
             {
                 fitness_values.push_back(players.at(i).get_fitness());
             }
 
-            // Get random number
-            static std::random_device device;
-            std::mt19937 engine(device()); // Seed the random number engine
-            std::discrete_distribution<> dist(fitness_values.begin(), fitness_values.end()); // Create the distribution
-
+            // Get all parents
             std::vector<GeneticIndividual> parents;
             for (int i  = 0; i < loop_num; ++i)
             {
-                parents.push_back(players.at(dist(engine)));
+                parents.push_back(players.at(get_random_distribution(fitness_values.begin(), fitness_values.end())));
             }
+
+            // Perform genetic operators
             lattice.at(i).at(j) = crossover(parents);
             if (mut)
             {
@@ -115,6 +138,42 @@ void GeneticAlgorithm::neighbourhood_pop()
     }
 }
 
+/**
+ *
+ * Get a random number from a distribution
+ *
+ * @brief GeneticAlgorithm::get_random_distribution
+ * @param first: first element of an vector
+ * @param last: last element of a vector
+ * @return random number
+ */
+int GeneticAlgorithm::get_random_distribution(std::vector<double>::iterator first, std::vector<double>::iterator last)
+{
+    std::discrete_distribution<> dist(first, last); // Create the distribution
+    return dist(engine);
+}
+
+/**
+ *
+ * Get a random number from a uniform distribution
+ *
+ * @brief GeneticAlgorithm::get_random_int
+ * @param min: minimum value to get
+ * @param max: maximum value to get
+ * @return random number
+ */
+int GeneticAlgorithm::get_random_int(int min, int max)
+{
+    std::uniform_int_distribution<> dist(min, max);
+    return dist(engine);
+}
+
+/**
+ *
+ * One of the possible populations. Loops around the neighbourhood, gets the best parents, and performs crossover/mutation
+ *
+ * @brief GeneticAlgorithm::one_lattice_pop
+ */
 void GeneticAlgorithm::one_lattice_pop()
 {
     std::vector<std::tuple<std::vector<int>, GeneticIndividual>> players;
@@ -133,82 +192,102 @@ void GeneticAlgorithm::one_lattice_pop()
 
     std::vector<double> fitness_values;
 
-    //qDebug() << "Players size" << QString::number(players.size());
-
+    // Check if parents is higher than dimension
     int loop_num = parent_num <= players.size() && parent_num > 0 ? parent_num : players.size();
 
+    // Get the fitness values of all individuals
     for (int i  = 0; i < loop_num; ++i)
     {
         fitness_values.push_back(std::get<1>(players.at(i)).get_fitness());
     }
 
-    // Get random number
-    static std::random_device device;
-    std::mt19937 engine(device()); // Seed the random number engine
-    std::discrete_distribution<> dist(fitness_values.begin(), fitness_values.end()); // Create the distribution
-
-    //qDebug() << "Players size";
-
+    // Get best parents and perform genetic operators
     for (int i = 0; i < child_num; ++i)
     {
         std::vector<int> idx = std::get<0>(players.at(players.size()-i-1));
-
-        //qDebug() << "Index size" << QString::number(idx.size());
-
         std::vector<GeneticIndividual> parents;
-        parents.push_back(std::get<1>(players.at(dist(engine))));
-        parents.push_back(std::get<1>(players.at(dist(engine))));
+
+        // Get parents based on a discrete distribution
+        parents.push_back(std::get<1>(players.at(get_random_distribution(fitness_values.begin(), fitness_values.end()))));
+        parents.push_back(std::get<1>(players.at(get_random_distribution(fitness_values.begin(), fitness_values.end()))));
+
+        // perform genetic operators
         lattice.at(idx[0]).at(idx[1]) = crossover(parents);
         if (mut)
         {
             mutation(lattice.at(idx[0]).at(idx[1]));
         }
     }
-
-        //qDebug() << "PlayersEND size";
 }
 
+/**
+ *
+ * Perform mutation operator.
+ *
+ * @brief GeneticAlgorithm::mutation
+ * @param ind
+ */
 void GeneticAlgorithm::mutation(GeneticIndividual ind)
 {
-    static std::random_device device;
-    std::mt19937 engine(device());
-    std::uniform_int_distribution<> dist(0, 10000);
-
-    if (dist(engine) == 7)
+    if (get_random_int(0, 100000) == 7)
     {
-        static std::random_device dev;
-        std::mt19937 eng(dev());
-        std::uniform_int_distribution<> dis(0, ind.get_gene_size()-1);
-        ind.genes[dis(eng)] = !ind.genes[dis(eng)];
+        int random_number = get_random_int(0, ind.get_gene_size()-1);
+        ind.genes[random_number] = !ind.genes[random_number];
     }
-
 }
 
+/**
+ *
+ * Perform fifty-fifty crossover operator.
+ *
+ * @brief GeneticAlgorithm::crossover
+ * @param parents: array of possible parents.
+ * @return new child
+ */
 GeneticIndividual GeneticAlgorithm::crossover(std::vector<GeneticIndividual> parents)
 {
-    static std::random_device device;
-    std::mt19937 engine(device());
-    std::uniform_int_distribution<> dist(0, 1);
+    std::vector<GeneticIndividual> two_parents;
+    int index1 = get_random_int(0, parents.size()-1);
+    int index2;
 
-    if (parents.at(0).get_encoding() == GeneticIndividual::AUTOMATA)
+    // Check if two indexes aren't the same
+    while (true)
     {
-        return dist(engine) == 0 ? parents.at(0) : parents.at(1);
+        index2 = get_random_int(0, parents.size()-1);
+        if(index2 != index1)
+        {
+            break;
+        }
     }
-    else if (parents.at(0).get_encoding() == GeneticIndividual::CELLSTATE)
+
+    two_parents.push_back(parents.at(index1));
+    two_parents.push_back(parents.at(index2));
+
+    // Get a random parent and duplicate it as a child
+    if (two_parents.at(0).get_encoding() == GeneticIndividual::AUTOMATA)
     {
-        return dist(engine) == 0 ? parents.at(0) : parents.at(1);
+        return get_random_int(0, 1) == 0 ? two_parents.at(0) : two_parents.at(1);
     }
-    else if (parents.at(0).get_encoding() == GeneticIndividual::ATTRIBUTE)
+    else if (two_parents.at(0).get_encoding() == GeneticIndividual::CELLSTATE)
     {
-        return dist(engine) == 0 ? parents.at(0) : parents.at(1);
+        return get_random_int(0, 1) == 0 ? two_parents.at(0) : two_parents.at(1);
+    }
+    else if (two_parents.at(0).get_encoding() == GeneticIndividual::ATTRIBUTE)
+    {
+        return get_random_int(0, 1) == 0 ? two_parents.at(0) : two_parents.at(1);
     }
 }
 
 
 /**
-** Takes in a board of any square dimension, and gets all the neighbours of a cell.
-** Cells around the edge are wrapped around to create a toroid like shape.
-**/
+ *
+ * Takes in a board of any square dimension, and gets all the neighbours of a cell.
+ * Cells around the edge are wrapped around to create a toroid like shape.
+ *
+ * @brief GeneticAlgorithm::get_neighbours
+ * @param index: vector of indices
+ * @return a vector of neighbour indices
+ */
 std::vector<std::vector<int>> GeneticAlgorithm::get_neighbours(std::vector<int> index)
 {
         std::vector<std::vector<int>> neighbours;

@@ -257,6 +257,17 @@ ApplicationWindow {
             Layout.leftMargin: 4
         }
 
+        Button {
+            id: testAllButton
+            width: 124
+            height: 48
+            text: qsTr("Test All")
+            onClicked: lattice.test()
+            Layout.row: 8
+            Layout.column: 9
+            Layout.leftMargin: 4
+        }
+
         Label {
             id: encodingLabel
             x: 1129
