@@ -136,6 +136,7 @@ void GeneticLattice::initialise_board()
     lattice.at(half+1).at(half) = GeneticIndividual(encoding, 'd');
     lattice.at(half+1).at(half+1) = GeneticIndividual(encoding, 'd');
     lattice.at(half).at(half) = GeneticIndividual(encoding, 'd');
+
 }
 
 /**
@@ -143,7 +144,7 @@ void GeneticLattice::initialise_board()
  * e getter
  *
  * @brief GeneticLattice::get_e
- * @return
+ * @return e
  */
 double GeneticLattice::get_e()
 {
@@ -155,7 +156,7 @@ double GeneticLattice::get_e()
  * b getter
  *
  * @brief GeneticLattice::get_b
- * @return
+ * @return b
  */
 double GeneticLattice::get_b()
 {
@@ -167,7 +168,7 @@ double GeneticLattice::get_b()
  * Dimension getter
  *
  * @brief GeneticLattice::get_dimension
- * @return
+ * @return dimension
  */
 int GeneticLattice::get_dimension()
 {
@@ -179,7 +180,7 @@ int GeneticLattice::get_dimension()
  * Encoding getter
  *
  * @brief GeneticLattice::get_encoding
- * @return
+ * @return encoding
  */
 GeneticIndividual::ENCODING GeneticLattice::get_encoding()
 {

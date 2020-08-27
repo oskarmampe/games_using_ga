@@ -146,12 +146,11 @@ void GeneticIndividual::encode(){
     else if (this->current == AUTOMATA)
     {
         //current strategy 1 initial state, 2 current strategies, 4 moves to another state
-        gene_size = 1+2*2+4*2;
-        genes = new bool[gene_size];
+        gene_size = 1+2*3;
 
         // Cooperate and defect strategies as automata.
         bool cooperate[]{false, false, false, false, true, true, true};
-        bool defect[]{true, true, true, true, false, false, false};
+        bool defect[]{true, true, true, true, true, false, false};
 
         if (this->strategy == 'd')
         {
@@ -177,25 +176,26 @@ void GeneticIndividual::encode(){
 void GeneticIndividual::make_automata()
 {
     // Get the initial state and clear everything
-    int initial_state = (int)genes[0];
+    int initial_state = genes[0] == false ? 0 : 1;
     state = initial_state;
+    int other_state = initial_state == 1 ? 0 : 1;
     automata.clear();
 
     // Where to go from the initial state
     std::map<int, int> initial_inner;
-    initial_inner.insert(std::make_pair(0, (int)genes[2]));
-    initial_inner.insert(std::make_pair(1, (int)genes[3]));
+    initial_inner.insert(std::make_pair(0, genes[2] == false ? 0 : 1));
+    initial_inner.insert(std::make_pair(1, genes[3] == false ? 0 : 1));
     automata.insert(std::make_pair(initial_state, initial_inner));
 
     // Where to go from the other state
     std::map<int, int> other_inner;
-    other_inner.insert(std::make_pair(0, (int)genes[5]));
-    other_inner.insert(std::make_pair(1, (int)genes[6]));
-    automata.insert(std::make_pair(!genes[0], other_inner));
+    other_inner.insert(std::make_pair(0, genes[5] == false ? 0 : 1));
+    other_inner.insert(std::make_pair(1, genes[6] == false ? 0 : 1));
+    automata.insert(std::make_pair(other_state, other_inner));
 
     // Get the strategies at each state
     automata_values[initial_state] = genes[1] == false ? 'c' : 'd';
-    automata_values[(int)!genes[0]] = genes[4] == false ? 'c' : 'd';
+    automata_values[other_state] = genes[4] == false ? 'c' : 'd';
 }
 
 /**

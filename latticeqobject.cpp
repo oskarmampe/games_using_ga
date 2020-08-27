@@ -224,7 +224,7 @@ void LatticeQObject::set_mutation(bool mut)
  * t getter
  *
  * @brief LatticeQObject::get_t
- * @return
+ * @return t
  */
 QString LatticeQObject::get_t()
 {
@@ -236,7 +236,7 @@ QString LatticeQObject::get_t()
  * e getter
  *
  * @brief LatticeQObject::get_e
- * @return
+ * @return e
  */
 QString LatticeQObject::get_e()
 {
@@ -248,7 +248,7 @@ QString LatticeQObject::get_e()
  * Encoding getter
  *
  * @brief LatticeQObject::get_encoding
- * @return
+ * @return encoding
  */
 int LatticeQObject::get_encoding()
 {
@@ -271,7 +271,7 @@ int LatticeQObject::get_encoding()
  * b getter
  *
  * @brief LatticeQObject::get_b
- * @return
+ * @return b
  */
 QString LatticeQObject::get_b()
 {
@@ -283,7 +283,7 @@ QString LatticeQObject::get_b()
  * Dimension getter
  *
  * @brief LatticeQObject::get_dimension
- * @return
+ * @return dimension
  */
 QString LatticeQObject::get_dimension()
 {
@@ -295,7 +295,7 @@ QString LatticeQObject::get_dimension()
  * Parent getter
  *
  * @brief LatticeQObject::get_parent
- * @return
+ * @return parent
  */
 QString LatticeQObject::get_parent()
 {
@@ -307,7 +307,7 @@ QString LatticeQObject::get_parent()
  * Children getter
  *
  * @brief LatticeQObject::get_children
- * @return
+ * @return children
  */
 QString LatticeQObject::get_children()
 {
@@ -319,7 +319,7 @@ QString LatticeQObject::get_children()
  * Global population getter
  *
  * @brief LatticeQObject::get_global_pop
- * @return
+ * @return global or local/neighbourhood
  */
 bool LatticeQObject::get_global_pop()
 {
@@ -331,7 +331,7 @@ bool LatticeQObject::get_global_pop()
  * Mutation getter
  *
  * @brief LatticeQObject::get_mutation
- * @return
+ * @return mutation
  */
 bool LatticeQObject::get_mutation()
 {
@@ -343,7 +343,7 @@ bool LatticeQObject::get_mutation()
  * Path getter
  *
  * @brief LatticeQObject::get_path
- * @return
+ * @return path
  */
 QString LatticeQObject::get_path()
 {
